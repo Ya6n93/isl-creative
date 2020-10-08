@@ -1,8 +1,8 @@
 import React from 'react';
-import { 
-    View, 
-    Text, 
-    TouchableOpacity, 
+import {
+    View,
+    Text,
+    TouchableOpacity,
     TextInput,
     Platform,
     StyleSheet ,
@@ -18,7 +18,11 @@ import { useTheme } from 'react-native-paper';
 
 import { AuthContext } from '../components/context';
 
+
+import AsyncStorage from '@react-native-community/async-storage';
+
 import Users from '../model/users';
+import axios from 'axios';
 
 const SignInScreen = ({navigation}) => {
 
@@ -92,24 +96,35 @@ const SignInScreen = ({navigation}) => {
 
     const loginHandle = (userName, password) => {
 
-        const foundUser = Users.filter( item => {
-            return userName == item.username && password == item.password;
-        } );
-
         if ( data.username.length == 0 || data.password.length == 0 ) {
-            Alert.alert('Wrong Input!', 'Username or password field cannot be empty.', [
-                {text: 'Okay'}
+            Alert.alert('Champs requis !', 'Tout les champs doivent être rempli.', [
+                {text: 'Ok'}
             ]);
             return;
         }
 
-        if ( foundUser.length == 0 ) {
-            Alert.alert('Invalid User!', 'Username or password is incorrect.', [
-                {text: 'Okay'}
-            ]);
-            return;
-        }
-        signIn(foundUser);
+        let user = {
+            'email': data.username,
+            'password': data.password
+        };
+
+        // console.log("caca",data);
+        //
+        axios.post("http://34.68.140.135/api/users/login", user)
+            .then( response => {
+                console.log(response.data)
+                AsyncStorage.setItem("user", response.data)
+                signIn(response.data);
+            })
+            .catch(error => {
+                console.log(error.response.data)
+                Alert.alert('Erreur', error.response.data, [
+                    {text: 'Ok'}
+                ]);
+            });
+
+        //signIn();
+
     }
 
     return (
@@ -118,7 +133,7 @@ const SignInScreen = ({navigation}) => {
         <View style={styles.header}>
             <Text style={styles.text_header}>Connexion</Text>
         </View>
-        <Animatable.View 
+        <Animatable.View
             animation="fadeInUpBig"
             style={[styles.footer, {
                 backgroundColor: colors.background
@@ -126,15 +141,15 @@ const SignInScreen = ({navigation}) => {
         >
             <Text style={[styles.text_footer, {
                 color: colors.text
-            }]}>Nom d'utilisateur :</Text>
+            }]}>Adresse Email :</Text>
             <View style={styles.action}>
-                <FontAwesome 
+                <FontAwesome
                     name="user-o"
                     color={colors.text}
                     size={20}
                 />
-                <TextInput 
-                    placeholder="Votre nom d'utilisateur"
+                <TextInput
+                    placeholder="Votre Email"
                     placeholderTextColor="#666666"
                     style={[styles.textInput, {
                         color: colors.text
@@ -143,11 +158,11 @@ const SignInScreen = ({navigation}) => {
                     onChangeText={(val) => textInputChange(val)}
                     onEndEditing={(e)=>handleValidUser(e.nativeEvent.text)}
                 />
-                {data.check_textInputChange ? 
+                {data.check_textInputChange ?
                 <Animatable.View
                     animation="bounceIn"
                 >
-                    <Feather 
+                    <Feather
                         name="check-circle"
                         color="green"
                         size={20}
@@ -155,24 +170,24 @@ const SignInScreen = ({navigation}) => {
                 </Animatable.View>
                 : null}
             </View>
-            { data.isValidUser ? null : 
+            { data.isValidUser ? null :
             <Animatable.View animation="fadeInLeft" duration={500}>
-            <Text style={styles.errorMsg}>Username must be 4 characters long.</Text>
+            <Text style={styles.errorMsg}>Email must be 4 characters long.</Text>
             </Animatable.View>
             }
-            
+
 
             <Text style={[styles.text_footer, {
                 color: colors.text,
                 marginTop: 35
             }]}>Mot de passe :</Text>
             <View style={styles.action}>
-                <Feather 
+                <Feather
                     name="lock"
                     color={colors.text}
                     size={20}
                 />
-                <TextInput 
+                <TextInput
                     placeholder="Votre mot de passe"
                     placeholderTextColor="#666666"
                     secureTextEntry={data.secureTextEntry ? true : false}
@@ -185,14 +200,14 @@ const SignInScreen = ({navigation}) => {
                 <TouchableOpacity
                     onPress={updateSecureTextEntry}
                 >
-                    {data.secureTextEntry ? 
-                    <Feather 
+                    {data.secureTextEntry ?
+                    <Feather
                         name="eye-off"
                         color="grey"
                         size={20}
                     />
                     :
-                    <Feather 
+                    <Feather
                         name="eye"
                         color="grey"
                         size={20}
@@ -200,12 +215,12 @@ const SignInScreen = ({navigation}) => {
                     }
                 </TouchableOpacity>
             </View>
-            { data.isValidPassword ? null : 
+            { data.isValidPassword ? null :
             <Animatable.View animation="fadeInLeft" duration={500}>
             <Text style={styles.errorMsg}>Password must be 8 characters long.</Text>
             </Animatable.View>
             }
-            
+
 
             <TouchableOpacity>
                 <Text style={{color: '#bf0000', marginTop:15}}>Mot de passe oublié ?</Text>
@@ -247,7 +262,7 @@ export default SignInScreen;
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1, 
+      flex: 1,
       backgroundColor: '#bf0000'
     },
     header: {

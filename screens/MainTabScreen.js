@@ -4,6 +4,7 @@ import { createMaterialBottomTabNavigator } from '@react-navigation/material-bot
 import { createStackNavigator } from '@react-navigation/stack';
 
 import Icon from 'react-native-vector-icons/Ionicons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 import HomeScreen from './HomeScreen';
 import DetailsScreen from './DetailsScreen';
@@ -38,7 +39,7 @@ const MainTabScreen = () => (
           tabBarLabel: 'Musique',
           tabBarColor: '#bf0000',
           tabBarIcon: ({ color }) => (
-            <Icon name="musical-notes-outline" color={color} size={26} />
+            <FontAwesome name="music" color={color} size={26} />
           ),
         }}
       />
@@ -50,7 +51,7 @@ const MainTabScreen = () => (
           tabBarLabel: 'Rechercher',
           tabBarColor: '#bf0000',
           tabBarIcon: ({ color }) => (
-            <Icon name="search-outline" color={color} size={26} />
+              <FontAwesome name="podcast" color={color} size={26} />
           ),
         }}
       />
@@ -106,4 +107,3 @@ const DetailsStackScreen = ({navigation}) => (
         }} />
 </DetailsStack.Navigator>
 );
-  

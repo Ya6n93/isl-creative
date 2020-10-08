@@ -1,5 +1,9 @@
 import React from 'react';
-import { View, Text, Button, StyleSheet, Image, TextInput, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, Button, StyleSheet, Image, TextInput, TouchableOpacity, FlatList, Alert } from 'react-native';
+import TrackPlayer from 'react-native-track-player';
+import Icon from './MainTabScreen';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import {white} from 'color-name';
 
 
 
@@ -7,43 +11,47 @@ const DetailsScreen = ({navigation}) => {
 
     const data = {
         data: [
-            {id:1, color:"#bf0000", name: "Musique 1", tags:['rap', 'africa', 'tag 3', 'Mobile dev', 'RN', 'Bootdey']},
-            {id:2, color:"#bf0000", name: "Musique 2", tags:['rap', 'africa', 'tag 3', 'Dey-Dey', 'Developer']},
-            {id:3, color:"#bf0000", name: "Musique 3", tags:['rap', 'africa', 'tag 3']},
-            {id:4, color:"#bf0000", name: "Musique 4", tags:['rap', 'africa', 'tag 3']},
-            {id:5, color:"#bf0000", name: "Musique 5", tags:['rap', 'africa', 'tag 3']},
-            {id:6, color:"#bf0000", name: "Musique 6", tags:['rap', 'africa', 'tag 3']},
-            {id:7, color:"#bf0000", name: "Musique 7", tags:['rap', 'africa', 'tag 3']},
-            {id:8, color:"#bf0000", name: "Musique 8", tags:['rap', 'africa', 'tag 3']},
-            {id:9, color:"#bf0000", name: "Musique 9", tags:['rap', 'africa', 'tag 3']},
+            {id:1, color:"#bf0000", name: "Musique 1", artist: "artist --", tags:['rap', 'africa', 'tag 3', 'Mobile dev', 'RN', 'Bootdey']},
+            {id:2, color:"#bf0000", name: "Musique 2", artist: "artist --", tags:['rap', 'africa', 'tag 3', 'Dey-Dey', 'Developer']},
+            {id:3, color:"#bf0000", name: "Musique 3", artist: "artist --", tags:['rap', 'africa', 'tag 3']},
+            {id:4, color:"#bf0000", name: "Musique 4", artist: "artist --", tags:['rap', 'africa', 'tag 3']},
+            {id:5, color:"#bf0000", name: "Musique 5", artist: "artist --", tags:['rap', 'africa', 'tag 3']},
+            {id:6, color:"#bf0000", name: "Musique 6", artist: "artist --", tags:['rap', 'africa', 'tag 3']},
+            {id:7, color:"#bf0000", name: "Musique 7", artist: "artist --", tags:['rap', 'africa', 'tag 3']},
+            {id:8, color:"#bf0000", name: "Musique 8", artist: "artist --", tags:['rap', 'africa', 'tag 3']},
+            {id:9, color:"#bf0000", name: "Musique 9", artist: "artist --", tags:['rap', 'africa', 'tag 3']},
         ]
     }
 
-    const cardClickEventListener = (item) => {
-        Alert.alert(item.name);
-    }
+    const start = async () => {
+       // Set up the player
+        await TrackPlayer.setupPlayer();
 
-    const tagClickEventListener = (tagName) => {
-        Alert.alert(tagName);
-    }
+        //Add a track to the queue
+        await TrackPlayer.add({
+            id: 'trackId',
+            url: 'https://www.musicscreen.be/mp3gallery/content/songs/MP3/Piano/Jasmin.mp3',
+            title: 'Track Title',
+            artist: 'Track Artist',
+            artwork: '../assets/logo.png'
+        });
 
-    const renderTags = (item) =>{
-        return item.tags.map((tag, key) => {
-            return (
-                <TouchableOpacity key={key} style={styles.btnColor} onPress={() => {tagClickEventListener(tag)}}>
-                    <Text>{tag}</Text>
-                </TouchableOpacity>
-            );
-        })
-    }
+        // Start playing it
+        await TrackPlayer.play();
+    };
+
+    const stop = async () => {
+        // Start playing it
+        await TrackPlayer.stop();
+    };
 
     return (
       <View style={styles.container}>
           <View style={styles.formContent}>
               <View style={styles.inputContainer}>
-                  <Image style={[styles.icon, styles.inputIcon]} source={{uri: 'https://png.icons8.com/search/androidL/100/000000'}}/>
+                  <Image style={[styles.icon, styles.inputIcon]} source={require('../assets/search.png')}/>
                   <TextInput style={styles.inputs}
-                             placeholder="Search"
+                             placeholder="Rechercher"
                              underlineColorAndroid='transparent'/>
               </View>
           </View>
@@ -56,15 +64,33 @@ const DetailsScreen = ({navigation}) => {
               }}
               renderItem={({item}) => {
                   return (
-                      <TouchableOpacity style={[styles.card, {borderColor:item.color}]} onPress={() => {cardClickEventListener(item)}}>
+                      <View style={[styles.card, {borderColor:item.color}]}>
                           <View style={styles.cardContent}>
-                              <Image style={[styles.image, styles.imageContent]} source={{uri: 'https://cdn.pixabay.com/photo/2016/02/01/12/33/play-1173551_1280.png'}}/>
-                              <Text style={styles.name}>{item.name}</Text>
+                              <Image style={[styles.image]} source={require('../assets/cd.png')}/>
+                              <View>
+                                  <Text style={styles.name}>{item.name}</Text>
+                                  <Text style={styles.artist}>{item.artist}</Text>
+                              </View>
                           </View>
                           <View style={[styles.cardContent, styles.tagsContent]}>
-                              {renderTags(item)}
+                              <TouchableOpacity style={styles.btnColor} onPress={() => {start()}}>
+                                  <Text style={styles.textBtnColor}>Play</Text>
+                                  <FontAwesome
+                                      name="play"
+                                      color="white"
+                                      size={20}
+                                  />
+                              </TouchableOpacity>
+                              <TouchableOpacity style={styles.btnColor} onPress={() => {stop()}}>
+                                  <Text style={styles.textBtnColor}>Stop</Text>
+                                  <FontAwesome
+                                      name="stop"
+                                      color="white"
+                                      size={20}
+                                  />
+                              </TouchableOpacity>
                           </View>
-                      </TouchableOpacity>
+                      </View>
                   )
               }}/>
       </View>
@@ -75,11 +101,6 @@ export default DetailsScreen;
 
 
 const styles = StyleSheet.create({
-  // container: {
-  //   flex: 1,
-  //   alignItems: 'center',
-  //   justifyContent: 'center'
-  // },
     formContent:{
         flexDirection: 'row',
         marginTop:10,
@@ -131,34 +152,42 @@ const styles = StyleSheet.create({
         borderBottomColor: '#bf0000',
         borderLeftColor: '#bf0000',
         borderRightColor: '#bf0000',
+        borderRadius: 20,
     },
     cardContent:{
         flexDirection:'row',
         marginLeft:10,
     },
-    imageContent:{
-        marginTop:-20,
-    },
     tagsContent:{
-        marginTop:10,
-        flexWrap:'wrap'
+        flexWrap:'wrap',
+        alignSelf: "flex-end",
     },
     image:{
-        width:60,
-        height:60,
+        width:70,
+        height:70,
         borderRadius:30,
     },
     name:{
         fontSize:20,
         fontWeight: 'bold',
         marginLeft:10,
-        alignSelf: 'center'
+        marginTop: 5
+    },
+    artist:{
+        fontSize:17,
+        textDecorationLine : 'underline',
+        marginLeft:10,
     },
     btnColor: {
         padding:10,
-        borderRadius:40,
+        borderRadius:10,
         marginHorizontal:3,
-        backgroundColor: "#eee",
+        backgroundColor: "#bf0000",
         marginTop:5,
+        flexDirection: "row"
     },
+    textBtnColor: {
+        color: "white",
+        marginRight: 5,
+    }
 });

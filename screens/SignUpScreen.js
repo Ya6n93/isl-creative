@@ -1,27 +1,30 @@
 import React from 'react';
-import { 
-    View, 
-    Text, 
-    Button, 
-    TouchableOpacity, 
+import {
+    View,
+    Text,
+    Button,
+    TouchableOpacity,
     Dimensions,
     TextInput,
     Platform,
     StyleSheet,
     ScrollView,
-    StatusBar
+    StatusBar,
+    Alert
 } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import LinearGradient from 'react-native-linear-gradient';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
+import axios from 'axios';
+import AsyncStorage from '@react-native-community/async-storage';
 
 const SignInScreen = ({navigation}) => {
 
     const [data, setData] = React.useState({
         username: '',
+        email: '',
         password: '',
-        confirm_password: '',
         check_textInputChange: false,
         secureTextEntry: true,
         confirm_secureTextEntry: true,
@@ -43,17 +46,17 @@ const SignInScreen = ({navigation}) => {
         }
     }
 
+    const handleEmailChange = (val) => {
+        setData({
+            ...data,
+            email: val
+        });
+    }
+
     const handlePasswordChange = (val) => {
         setData({
             ...data,
             password: val
-        });
-    }
-
-    const handleConfirmPasswordChange = (val) => {
-        setData({
-            ...data,
-            confirm_password: val
         });
     }
 
@@ -71,35 +74,57 @@ const SignInScreen = ({navigation}) => {
         });
     }
 
+    var bodyFormData = new FormData();
+    bodyFormData.append('name', data.username);
+    bodyFormData.append('email', data.email);
+    bodyFormData.append('password', data.password);
+
+
+    const registerHandle = async () => {
+        axios.post("http://34.68.140.135/api/users/register", bodyFormData)
+            .then( response => {
+                //console.log(response.data);
+                AsyncStorage.setItem("emailConfirm", response.data.email);
+                navigation.navigate('ConfirmEmailScreen');
+            })
+            .catch(error => {
+                console.log(error.response.data)
+                Alert.alert('Erreur', error.response.data, [
+                   {text: 'Ok'}
+                ]);
+            });
+        //navigation.navigate('ConfirmEmailScreen');
+    }
+
     return (
       <View style={styles.container}>
           <StatusBar backgroundColor='#bf0000' barStyle="light-content"/>
         <View style={styles.header}>
             <Text style={styles.text_header}>S'inscrire</Text>
         </View>
-        <Animatable.View 
+        <Animatable.View
             animation="fadeInUpBig"
             style={styles.footer}
         >
             <ScrollView>
-            <Text style={styles.text_footer}>Nom d'utilisateur</Text>
+            <Text style={styles.text_footer}>Pseudonyme</Text>
             <View style={styles.action}>
-                <FontAwesome 
+                <FontAwesome
                     name="user-o"
                     color="#05375a"
                     size={20}
                 />
-                <TextInput 
+                <TextInput
                     placeholder="Saisir un nom d'utilisateur"
                     style={styles.textInput}
                     autoCapitalize="none"
                     onChangeText={(val) => textInputChange(val)}
                 />
-                {data.check_textInputChange ? 
+                {data.check_textInputChange ?
                 <Animatable.View
                     animation="bounceIn"
                 >
-                    <Feather 
+                    <Feather
                         name="check-circle"
                         color="green"
                         size={20}
@@ -108,33 +133,48 @@ const SignInScreen = ({navigation}) => {
                 : null}
             </View>
 
+            <Text style={[styles.text_footer, {marginTop: 35}]}>Adresse Email</Text>
+            <View style={styles.action}>
+                <FontAwesome
+                    name="envelope-o"
+                    color="#05375a"
+                    size={20}
+                />
+                <TextInput
+                    placeholder="Saisir une adresse email"
+                    style={styles.textInput}
+                    autoCapitalize="none"
+                    onChangeText={(val) => handleEmailChange(val)}
+                />
+            </View>
+
             <Text style={[styles.text_footer, {
                 marginTop: 35
             }]}>Mot de passe</Text>
             <View style={styles.action}>
-                <Feather 
+                <Feather
                     name="lock"
                     color="#05375a"
                     size={20}
                 />
-                <TextInput 
+                <TextInput
                     placeholder="Saisir un mot de passe"
-                    secureTextEntry={data.secureTextEntry ? true : false}
+                    secureTextEntry={data.confirm_secureTextEntry ? true : false}
                     style={styles.textInput}
                     autoCapitalize="none"
                     onChangeText={(val) => handlePasswordChange(val)}
                 />
                 <TouchableOpacity
-                    onPress={updateSecureTextEntry}
+                    onPress={updateConfirmSecureTextEntry}
                 >
-                    {data.secureTextEntry ? 
-                    <Feather 
+                    {data.secureTextEntry ?
+                    <Feather
                         name="eye-off"
                         color="grey"
                         size={20}
                     />
                     :
-                    <Feather 
+                    <Feather
                         name="eye"
                         color="grey"
                         size={20}
@@ -143,40 +183,7 @@ const SignInScreen = ({navigation}) => {
                 </TouchableOpacity>
             </View>
 
-            <Text style={[styles.text_footer, {
-                marginTop: 35
-            }]}>Confirmez le mot de passe</Text>
-            <View style={styles.action}>
-                <Feather 
-                    name="lock"
-                    color="#05375a"
-                    size={20}
-                />
-                <TextInput 
-                    placeholder="Saisir à nouveau le mot de passe"
-                    secureTextEntry={data.confirm_secureTextEntry ? true : false}
-                    style={styles.textInput}
-                    autoCapitalize="none"
-                    onChangeText={(val) => handleConfirmPasswordChange(val)}
-                />
-                <TouchableOpacity
-                    onPress={updateConfirmSecureTextEntry}
-                >
-                    {data.secureTextEntry ? 
-                    <Feather 
-                        name="eye-off"
-                        color="grey"
-                        size={20}
-                    />
-                    :
-                    <Feather 
-                        name="eye"
-                        color="grey"
-                        size={20}
-                    />
-                    }
-                </TouchableOpacity>
-            </View>
+
             <View style={styles.textPrivate}>
                 <Text style={styles.color_textPrivate}>
                     En vous inscrivant vous acceptez les
@@ -188,7 +195,7 @@ const SignInScreen = ({navigation}) => {
             <View style={styles.button}>
                 <TouchableOpacity
                     style={styles.signIn}
-                    onPress={() => {}}
+                    onPress={() => {registerHandle()}}
                 >
                 <LinearGradient
                     colors={['#ff0000', '#bf0000']}
@@ -223,7 +230,7 @@ export default SignInScreen;
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1, 
+      flex: 1,
       backgroundColor: '#bf0000'
     },
     header: {
